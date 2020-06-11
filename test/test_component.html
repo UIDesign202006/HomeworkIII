@@ -1,0 +1,262 @@
+<!-- /**
+* index.html
+* @author bulbasaur
+* @description 
+* @created 2020-06-10T10:59:36.235Z+08:00
+* @copyright None 
+* None
+* @last-modified 2020-06-10T17:57:20.816Z+08:00
+*/ -->
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+</head>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<link rel="stylesheet" href="css/style.css">
+<body>
+    <!-- main app -->
+    <div id="app">
+        <!-- 判断是否为空 -->
+        <div class="cart-full" v-if="list.length">
+            <div class="table">
+                <table>
+                    <!-- 表头 -->
+                    <thead>
+                        <tr>
+                            <th><input id="checkAll" type="checkbox" class="checkAll" @click="checkAllOrNot($event)"></th>
+                            <th>No.</th>
+                            <th>Product</th>
+                            <th>Image</th>
+                            <th>Price</th>
+                            <th>Number</th>
+                            <th>Operation</th>
+                        </tr>
+                    </thead>
+                    <!-- Information -->
+                    <tbody>
+                        <tr v-for="(item, index) in list">
+                            <td>
+                                <input type="checkbox" class="checkItem" @click="checkItem($event, index)">
+                            </td>
+                            <td>
+                                <!-- 序号从 1 开始 -->
+                                {{ index + 1 }}
+                            </td>
+                            <!-- 输出名字 -->
+                            <td>
+                                {{ item.name }}
+                            </td>
+                            <!-- 输出图片 -->
+                            <td>
+                                <img :src="item.img" :alt="item.name">
+                            </td>
+                            <!-- 输出价格 -->
+                            <td>
+                                $ {{ item.price }}
+                            </td>
+                            <!-- Price Line -->
+                            <td>
+                                <button @click="reduceCount(index)" :disabled="item.count === 1"> - </button>
+                                <!-- price -->
+                                {{item.count}}
+                                <button @click="addCount(index)"> + </button>
+                            </td>
+                            <!-- Operation Line -->
+                            <td>
+                                <button @click="remove(index)"> Remove </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="total">
+                    <div class="header">
+                        Total:
+                    </div>
+                    <div class="price">
+                        $ {{totalPrice}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 如果为空 -->
+        <div class="cart-empty" v-else>
+            <p>There is nothing in the Cart ~</p>
+        </div>
+    </div>
+
+
+    <script>
+        Vue.component('add-Component', {
+            data: {
+                
+            }
+        })
+
+        let app = new Vue({
+    
+            el:"#app",
+            // Model
+            data:{
+                // 商品列表
+                list: [
+                    {
+                        id: 1,
+                        name: '宽松棉服羊羔绒外套',
+                        price: 168.00,
+                        img:'http://pic.616pic.com/ys_b_img/00/46/64/I4P0zom0qY.jpg',
+                        count: 1
+                    },
+                    {
+                        id: 2,
+                        name: '高细跟女靴',
+                        price: 104.00,
+                        img:'http://pic.616pic.com/ys_b_img/00/65/84/pCdRTMup6Q.jpg',
+                        count: 1
+                    },
+                    {
+                        id: 3,
+                        name: '佳能 EF 400mm f',
+                        price: 41000.00,
+                        img: 'http://pic.616pic.com/ys_bnew_img/00/03/70/UG3bRQWf3F.jpg',
+                        count: 1
+                    },
+                    {
+                        id: 1,
+                        name: '意式极简真皮沙发',
+                        price: 4782.40,
+                        img:'http://pic.616pic.com/ys_bnew_img/00/13/96/EWtjew9cas.jpg',
+                        count: 1
+                    },
+                ],
+                // 计算总价
+                checkList: []
+            },
+            mounted: function() {
+                // 默认将 List 全选
+                this.checkAll();
+                this.checkAllElement(document.querySelector(".checkAll"));
+            },
+            computed: {
+                
+                // 计算总价
+                
+                totalPrice: function () {
+                    var total = 0;
+                    for (var i = 0; i < this.checkList.length; i++) {
+                        var item = this.checkList[i];
+                        total += item.price * item.count;
+                    }
+        
+                    // 将 total 返回输出  -->  toLocaleString 进行四舍五入
+                    return total.toLocaleString();
+                }
+            },
+            methods: {
+                
+                // 减少 count
+                reduceCount: function (index) {
+                    if (this.list[index].count === 1){
+                        return;
+                    }
+                    app.list[index].count--;
+                },
+        
+                // 增加 count
+                addCount: function (index) {
+                    app.list[index].count++;
+                },
+        
+                // Rmove Prodects
+                remove: function(index) {
+                    console.log("remove-index:" + index);
+                    
+                    // 一次删除一个
+                    this.list.splice(index, 1);
+                    // 获取商品序号
+                    var id = index + 1;
+                    // Remove
+                    var $checkList = this.checkList;
+                    for (var i = 0; i < $checkList.length; i++) {
+                        var item = $checkList[i];
+                        // 序号匹配
+                        if (item.id == id) {
+                            // Delete
+                            $checkList.splice(i, 1);
+                        }
+                    }
+                },
+        
+                // 全选 or 都不选
+                checkAllOrNot: function(event) {
+                    // 全选
+                    if (event.target.checked) {
+                        this.checkAll();
+                        console.log("checkList：" + this.checkList);
+                    } 
+                    // 都不选
+                    else {
+                        console.log("All Not");
+                        this.checkInItems('noCheckAll');
+                        // 清空数组
+                        this.checkList.splice(0);
+                    }
+                },
+                
+                // 全选
+                checkAll: function() {
+                    console.log("全选");
+                    this.checkInItems('checkAll');
+                    //复制商品列表
+                    this.checkList = this.list.concat();
+                },
+        
+                // 判断是否全选
+                checkInItems: function(type) {
+                    var items = document.querySelectorAll('.checkItem');
+                    for (var i = 0; i < items.length; i++) {
+                        var item = items[i];
+                        if (type === 'checkAll') {
+                            item.checked = true;
+                        } else {
+                            item.checked = false;
+                        }
+                    }
+                },
+        
+                // 勾选或不勾选
+                checkItem: function(event, index) {
+                    console.log("checkItem");
+                    var element = event.target;
+                    var $allCheck = document.querySelector(".checkAll");
+                    //勾选，加入已选择列表
+                    if (element.checked) {
+                        this.checkList.push(this.list[index]);
+                        this.checkAllElement($allCheck);
+                    } 
+                    //不勾选，从已选择列表中去除
+                    else {
+                        this.checkList.splice(index, 1);
+                        $allCheck.checked = false;
+                    }
+                },
+        
+                // 若勾选全选框
+                checkAllElement: function (element) {
+                    //如果所有的商品都已被勾选，则勾选全选框
+                    
+                    if (this.checkList.length == this.list.length) {
+                        element.checked = true;
+                    }
+                }
+            }
+        })
+    </script>
+</body>
+</html>

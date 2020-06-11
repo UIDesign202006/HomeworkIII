@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+<style>
+*{
+    /* 改变字体 */
+    font: bold 12px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+    
+}
+
+img {
+    width: 60px;
+    height: 60px;
+}
+
+table {
+    /* 居中 */
+    text-align: center;
+    border: 1px solid #e9e9e9;
+    empty-cells: show;
+    height: 300px;
+    width: 600px;
+}
+
+th {
+    color: #4f6b72;
+    border-right: 1px solid  rgb(243, 243, 243);
+    border-bottom: 1px solid  rgb(243, 243, 243);
+    border-top: 1px solid  rgb(243, 243, 243);
+    letter-spacing: 2px;
+    /* 首字母大写 */
+    text-transform: uppercase;
+    text-align: left;
+    padding: 6px 6px 6px 12px;
+    background: rgb(243, 243, 243);
+}
+
+td {
+    border-right: 1px solid rgb(243, 243, 243);
+    border-bottom: 1px solid rgb(243, 243, 243);
+    /* background: #fff; */
+    font-size:14px;
+    padding: 6px 6px 6px 12px;
+    color: #4f6b72;
+}
+
+.cpn_form {
+    display: block;
+    border: #658992, solid;
+    height: 300px;
+    width: 550px;
+    margin-top: 30px;
+    padding-top: 30px;
+    padding-left: 30px;
+    border-style: solid; 
+    border-width: 5px;
+}
+
+</style>
+<body>
+    <div id="app">
+        <table>
+            <thead>
+                <th>No.</th>
+                <th>Product</th>
+                <th>Image</th>
+                <th>Price</th>
+                <th>Number</th>
+                <th>Operation</th>
+            </thead>
+            <tbody>
+                <tr v-for="(item, index) in list">
+                    <td>{{index + 1}}</td>
+                    <td>{{item.name}}</td>
+                    <td>
+                        <img :src="item.img" alt="item.name">
+                    </td>
+                    <td>{{item.price | showPrice(item.price)}}</td>
+                    <td>
+                        <button @click="reduceCount(index)" :disabled="item.count === 1"> - </button>
+                        {{item.count}}
+                        <button @click="addCount(index)"> + </button>
+                    </td>
+                    <td>
+                        <button @click="remove(index)"> Remove </button>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="5"> Total: </td>
+                    <td>
+                        {{totalPrice | showPrice(totalPrice)}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <cpn_form @itemAdd="newItem"></cpn_form>
+    </div>
+
+    <!-- 组件 template -->
+    <template id="cpn_form">
+        <div :model='product' class="cpn_form">
+            <h3>Add Item</h3>
+            <hr>
+            <p>
+                <label for="name">Product</label>
+                <input type="text" v-model.lazy="product.name">
+            </p>
+            <p>
+                <label for="img">Image</label>
+                <input type="text" v-model.lazy="product.img" size="50">
+            </p>
+            <p>
+                <label for="price">Price</label>
+                <input type="text" v-model.number="product.price">
+            </p>
+            <button @click="Add">Add</button>
+        </div>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script>
+
+        const cpn_form = {
+            template:"#cpn_form",
+            data() {
+                return {
+                    product: {
+                        name: 'sample',
+                        img: 'http://pic.616pic.com/ys_b_img/00/46/64/I4P0zom0qY.jpg',
+                        price: 5.00,
+                        count: 1
+                    }
+                    
+                }
+            },
+            methods: {
+                Add() {
+                    // 添加到父组件中
+                    this.$emit('itemadd', this.product)
+                }
+            }
+        }
+
+        const app = new Vue({
+            el:"#app",
+            data:{
+                list: [
+                    {
+                        id: 1,
+                        name: '宽松棉服羊羔绒外套',
+                        price: 168.00,
+                        img:'http://pic.616pic.com/ys_b_img/00/46/64/I4P0zom0qY.jpg',
+                        count: 1
+                    },
+                    {
+                        id: 2,
+                        name: '高细跟女靴',
+                        price: 104.00,
+                        img:'http://pic.616pic.com/ys_b_img/00/65/84/pCdRTMup6Q.jpg',
+                        count: 1
+                    },
+                    {
+                        id: 3,
+                        name: '佳能 EF 400mm f',
+                        price: 41000.00,
+                        img: 'http://pic.616pic.com/ys_bnew_img/00/03/70/UG3bRQWf3F.jpg',
+                        count: 1
+                    },
+                    {
+                        id: 1,
+                        name: '意式极简真皮沙发',
+                        price: 4782.40,
+                        img:'http://pic.616pic.com/ys_bnew_img/00/13/96/EWtjew9cas.jpg',
+                        count: 1
+                    },
+                ],
+            },
+            methods:{
+                // 减少 count
+                reduceCount: function (index) {
+                    if (this.list[index].count === 1){
+                        return;
+                    }
+                    app.list[index].count--;
+                },
+
+                // 增加 count
+                addCount: function (index) {
+                    app.list[index].count++;
+                },
+                // Rmove Prodects
+                remove: function(index) {
+                    console.log("remove-index:" + index);
+                    this.list.splice(index, 1);
+                },
+                newItem(item) {
+                    // 解包出来的结果
+                    this.list.push({...item})
+                }
+            },
+            components: {
+                cpn_form
+            },
+            filters: {
+                showPrice(value) {
+                    // 保持小数点后两位
+                    return '$' + value.toFixed(2)
+                }
+            },
+            computed: {
+        
+                // 计算总价
+                
+                totalPrice: function () {
+                    var total = 0;
+                    for (var i = 0; i < this.list.length; i++) {
+                        var item = this.list[i];
+                        total += item.price * item.count;
+                    }
+        
+                    // 将 total 返回输出  ->  toLocaleString 进行四舍五入
+                    return total;
+                }
+            },
+
+        })
+    </script>
+</body>
+</html>
